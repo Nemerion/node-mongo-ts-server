@@ -19,6 +19,7 @@
     "typescript": "^3.2.2"
   },
   "scripts": {
+    "start": "ts-node bin/start",
     "clean": "rimraf coverage build tmp",
     "build": "tsc -p tsconfig.release.json",
     "build:watch": "tsc -w -p tsconfig.release.json",
@@ -29,6 +30,11 @@
   "author": "Jakub Synowiec <github@jakubsynowiec.info>",
   "license": "Apache-2.0",
   "dependencies": {
+    "apollo-server-express": "^2.4.0",
+    "express": "^4.16.4",
+    "graphql": "^14.1.1",
+    "mongodb": "^3.1.13",
+    "nodemon": "^1.18.9",
     "tslib": "~1.9.3"
   }
 }
