@@ -16,7 +16,15 @@
     "noUnusedParameters": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "lib": [
+      "es5",
+      "scripthost",
+      "es2017",
+      "dom",
+      "esnext.asynciterable",
+      "es2015.promise"
+    ]
   },
   "include": [
     "src/**/*",

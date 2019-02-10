@@ -1,25 +1,12 @@
 {
-  "name": "node-typescript-boilerplate",
+  "name": "node-mongodb-graphql-typescript-boilerplate",
   "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
+  "description": "Boilerplate to quick-start a scratch server using node, mongodb, apollo and graphql in TypeScript.",
   "engines": {
     "node": ">= 10.13 <11"
   },
-  "devDependencies": {
-    "@types/jest": "^23.3.12",
-    "@types/node": "^10.12.18",
-    "jest": "~23.6.0",
-    "prettier": "1.15.3",
-    "rimraf": "^2.6.3",
-    "ts-jest": "~23.10.5",
-    "tslint": "~5.12.0",
-    "tslint-config-prettier": "1.17.0",
-    "tslint-microsoft-contrib": "~6.0.0",
-    "tsutils": "~3.7.0",
-    "typescript": "^3.2.2"
-  },
   "scripts": {
-    "start": "ts-node bin/start",
+    "start": "nodemon exec",
     "clean": "rimraf coverage build tmp",
     "build": "tsc -p tsconfig.release.json",
     "build:watch": "tsc -w -p tsconfig.release.json",
@@ -27,14 +14,32 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },
-  "author": "Jakub Synowiec <github@jakubsynowiec.info>",
-  "license": "Apache-2.0",
+  "nodemonConfig": {
+    "exec": "ts-node bin/start"
+  },
+  "author": "Martin Scocco",
+  "license": "MIT",
   "dependencies": {
+    "@types/graphql": "^14.0.5",
+    "@types/jest": "^23.3.12",
+    "@types/mongodb": "^3.1.19",
+    "@types/node": "^10.12.18",
+    "@types/npm": "^2.0.29",
+    "apollo-client": "^2.4.12",
+    "apollo-server": "^2.4.0",
     "apollo-server-express": "^2.4.0",
+    "es6-promise": "^4.2.2",
     "express": "^4.16.4",
     "graphql": "^14.1.1",
+    "jest": "~23.6.0",
     "mongodb": "^3.1.13",
-    "nodemon": "^1.18.9",
-    "tslib": "~1.9.3"
+    "prettier": "1.15.3",
+    "rimraf": "^2.6.3",
+    "ts-jest": "~23.10.5",
+    "tslib": "^1.9.3",
+    "tslint": "~5.12.0",
+    "tslint-config-prettier": "1.17.0",
+    "tslint-microsoft-contrib": "~6.0.0",
+    "tsutils": "~3.7.0"
   }
 }
