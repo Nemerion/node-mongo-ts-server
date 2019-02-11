@@ -1,19 +1,19 @@
 import * as express from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import { buildSchema, GraphQLScalarType  }  from 'graphql';
-import * as MongoClient from 'mongodb';
+import { GraphQLScalarType  }  from 'graphql';
+import { MongoClient, ObjectId } from 'mongodb';
 import { Kind } from 'graphql/language';
 
+import { schema } from './schema';
 
 const MONGO_URL = 'mongodb://localhost:27017/battleship';
-const dbName = 'jueguito';
-const port = 3001;
+const dbName = 'battleship';
+const port = process.env.PORT || 3001;
 
 const start = () => {
-
 	MongoClient.connect(MONGO_URL, (err, client) => {
 		if (err) {
-			console.log(err);
+			console.log(err, "There has been an error during server init");
 		}
 		console.log("Connected correctly to server");
 		const db = client.db(dbName);
@@ -21,36 +21,35 @@ const start = () => {
 		const Game = db.collection('game');
 		const History = db.collection('history');
 
-		const schema = buildSchema(`
-			scalar Date
-
-			type Query {
-				game(_id:ID): Game
-				history(_id: ID): GameHistory
-			}
-
-			type Game {
-				_id: ID
-				isYourTurn: Boolean
-				BoardStatus: [Int]
-			}
-			
-			type GameHistory {
-				startTime: Date
-				endTime: Date
-				totalTurns: Int
-				accuracy: Float
-				status: Boolean
-			}
-		`);
-
 		const resolvers = {
 			Query: {
-				game: ({_id}) => {
-					return Game.findOne(new MongoClient.ObjectId(_id));
+				//fieldName(obj, args, context, info) { result } positional arguments of resolvers.
+				game: (args) => {
+					return Game.findOne(new ObjectId(args._id));
 				},
-				history: ({_id}) => {
-					return History.findOne(new MongoClient.ObjectId(_id));
+				history: (args) => {
+					return History.findOne(new ObjectId(args._id));
+				}
+			},
+			Mutation: {
+				updateGame: (args) => {
+					return db.collection('game', (err, collection) => {
+						if (err) console.log(err);
+						collection.insertOne(args, (err, result) => {
+							if (err) {
+								console.log('error when inserting');
+							} else {
+								console.log(result, 'inserting successful');
+							}
+						});
+					});
+					/*return Game.insertOne(args, (err, records) => {
+						if (err) {
+							console.log('error when inserting');
+						} else if (records){
+							console.log('inserting successful');
+						}
+					});*/
 				}
 			},
 			Date: new GraphQLScalarType({
@@ -68,22 +67,19 @@ const start = () => {
 				  }
 				  return null;
 				}
-			  })
-		}
-
+			})
+		};
+		
 		const server = new ApolloServer({
 			schema,
 			resolvers
 		});
-	
 		const app = express();
-		
+
 		server.applyMiddleware({ app });
-		
 		app.listen(port, () => {
 			console.log(`GraphQL playground is running at http://localhost:` + port);
 		});
 	});
 }
-
 export default start;
