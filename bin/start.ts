@@ -1,3 +1,3 @@
-import server from '../src/server';
+import server from '../build/src/server';
 
 server();

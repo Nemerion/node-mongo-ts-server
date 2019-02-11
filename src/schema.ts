@@ -1,6 +1,7 @@
-import { buildSchema } from "graphql";
+//import { buildSchema } from "graphql";
+import { gql } from 'apollo-server-express';
 
-export const schema = buildSchema(`
+export const typeDefs = gql(`
     scalar Date
 
     type Query {
@@ -9,7 +10,7 @@ export const schema = buildSchema(`
     }
 
     type Mutation {
-        updateGame(_id:ID!, isYourTurn: Boolean!, boardStatus: [Int]!): Game
+        createGame(_id:ID!, boardStatus: [Int]): Game
     }
 
     type Game {

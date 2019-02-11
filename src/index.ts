@@ -1,14 +1,21 @@
 import * as express from 'express';
 import { ApolloServer } from 'apollo-server-express';
+//import { graphiqlExpress } from 'graphql-server-express';
 import { GraphQLScalarType  }  from 'graphql';
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { Kind } from 'graphql/language';
 
-import { schema } from './schema';
+import { typeDefs } from './schema';
 
 const MONGO_URL = 'mongodb://localhost:27017/battleship';
 const dbName = 'battleship';
 const port = process.env.PORT || 3001;
+const prepare = (o) => {
+	console.log('inside prepare', o, o._id);
+	o._id = o._id.toString();
+	console.log(o, o._id);
+    return o;
+}
 
 const start = () => {
 	MongoClient.connect(MONGO_URL, (err, client) => {
@@ -24,32 +31,20 @@ const start = () => {
 		const resolvers = {
 			Query: {
 				//fieldName(obj, args, context, info) { result } positional arguments of resolvers.
-				game: (args) => {
-					return Game.findOne(new ObjectId(args._id));
+				game: (obj, args) => {
+					console.log(obj, args);
+					return Game.findOne(args);
 				},
-				history: (args) => {
-					return History.findOne(new ObjectId(args._id));
+				history: (obj, args) => {
+					console.log(obj, args,);
+					return History.findOne(args);
 				}
 			},
 			Mutation: {
-				updateGame: (args) => {
-					return db.collection('game', (err, collection) => {
-						if (err) console.log(err);
-						collection.insertOne(args, (err, result) => {
-							if (err) {
-								console.log('error when inserting');
-							} else {
-								console.log(result, 'inserting successful');
-							}
-						});
-					});
-					/*return Game.insertOne(args, (err, records) => {
-						if (err) {
-							console.log('error when inserting');
-						} else if (records){
-							console.log('inserting successful');
-						}
-					});*/
+				createGame: async (obj, args) => {
+					console.log(obj, args);
+					const res = await Game.insertOne(args);
+					return prepare(res.ops[0]);
 				}
 			},
 			Date: new GraphQLScalarType({
@@ -71,11 +66,17 @@ const start = () => {
 		};
 		
 		const server = new ApolloServer({
-			schema,
+			typeDefs,
 			resolvers
+			//context
 		});
 		const app = express();
 
+		/*app.use('/graphiql', graphiqlExpress({
+			endpointURL: '/graphql',
+			subscriptionsEndpoint: 'ws://localhost:3000/subscriptions'
+		}));*/
+		
 		server.applyMiddleware({ app });
 		app.listen(port, () => {
 			console.log(`GraphQL playground is running at http://localhost:` + port);
