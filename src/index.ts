@@ -1,9 +1,17 @@
 import * as express from 'express';
 import { ApolloServer } from 'apollo-server-express';
-//import { graphiqlExpress } from 'graphql-server-express';
+//import { graphqlExpress, graphiqlExpress } from 'graphql-server-express';
 import { GraphQLScalarType  }  from 'graphql';
 import { MongoClient } from 'mongodb';
 import { Kind } from 'graphql/language';
+import { PubSub } from 'apollo-server';
+//import { SubscriptionServer } from 'subscriptions-transport-ws';
+import * as cors from 'cors';
+//import bodyParser from 'body-parser';
+//import { execute, subscribe } from 'graphql';
+//import * as http from 'http';
+//import { makeExecutableSchema } from 'graphql-tools';
+import { createServer } from 'http';
 
 import { typeDefs } from './schema';
 
@@ -14,9 +22,12 @@ const prepare = (o) => {
 	o._id = o._id.toString();
     return o;
 }
+const pubsub = new PubSub();
 
-const start = () => {
-	MongoClient.connect(MONGO_URL, (err, client) => {
+const GAME_ADDED = 'GAME_ADDED';
+
+const start = async () => {
+	await MongoClient.connect(MONGO_URL, (err, client) => {
 		if (err) {
 			console.log(err, "There has been an error during server init");
 		}
@@ -29,20 +40,35 @@ const start = () => {
 		const resolvers = {
 			Query: {
 				//fieldName(obj, args, context, info) { result } positional arguments of resolvers.
-				game: (obj, args) => {
+				game: async (obj, args) => {
 					console.log(obj, args);
-					return Game.findOne(args);
+					return await Game.findOne(args);
 				},
-				history: (obj, args) => {
-					console.log(obj, args,);
-					return History.findOne(args);
+				history: async (obj, args) => {
+					console.log(obj, args);
+					return await History.findOne(args);
+				},
+				games: async (obj, args) => {
+					console.log(obj, args);
+					return await (await Game.find({}).toArray()).map(prepare);
 				}
 			},
 			Mutation: {
 				createGame: async (obj, args) => {
 					console.log(obj, args);
+					await pubsub.publish(GAME_ADDED, { gameAdded: args });
 					const res = await Game.insertOne(args);
 					return prepare(res.ops[0]);
+				}
+			},
+			Subscription: {
+				gameAdded: {
+					resolve: (payload) => {
+            return {
+              customData: payload,
+            };
+          },
+					subscribe: () => pubsub.asyncIterator([GAME_ADDED])// maybe ['gameAdded']
 				}
 			},
 			Date: new GraphQLScalarType({
@@ -63,22 +89,59 @@ const start = () => {
 			})
 		};
 		
-		const server = new ApolloServer({
-			typeDefs,
-			resolvers
-			//context
-		});
 		const app = express();
 
-		/*app.use('/graphiql', graphiqlExpress({
-			endpointURL: '/graphql',
-			subscriptionsEndpoint: 'ws://localhost:3000/subscriptions'
-		}));*/
-		
-		server.applyMiddleware({ app });
-		app.listen(port, () => {
-			console.log(`GraphQL playground is running at http://localhost:` + port);
+		const apolloServer = new ApolloServer({
+			typeDefs,
+			resolvers,
 		});
+
+		apolloServer.applyMiddleware({ app });
+
+		// const options = {
+		// 	typeDefs,
+		// 	resolvers,
+		// };
+		// const executableSchema = makeExecutableSchema(options);
+
+		// const httpServer = http.createServer(app);
+		// server.installSubscriptionHandlers(httpServer);
+
+		// httpServer.listen(port, () => {
+		// 	console.log(`GraphQL playground is running at http://localhost:` + port);
+		// });
+
+		app.use(cors());
+
+	  // app.use('/graphql', bodyParser.json(), graphqlExpress({
+		//  	schema: executableSchema
+		// }));
+
+		// app.use('/graphiql', graphiqlExpress({
+		// 	endpointURL: '/graphql',
+		// 	subscriptionsEndpoint: 'ws://localhost:3001/subscriptions'
+		// }));
+
+		const httpServer = createServer(app);
+		apolloServer.installSubscriptionHandlers(httpServer);
+
+		httpServer.listen({ port: port }, () =>{
+			console.log(`Server ready at http://localhost:${port}${apolloServer.graphqlPath}`)
+			console.log(`Subscriptions ready at ws://localhost:${port}${apolloServer.subscriptionsPath}`)
+		})
+
+		// httpServer.listen(port, () => {
+		// 	console.log(`Apollo Server is now running on http://localhost:${port}`);
+		// 	// Set up the WebSocket for handling GraphQL subscriptions
+		// 	new SubscriptionServer({
+		// 		execute,
+		// 		subscribe,
+		// 		schema: executableSchema
+		// 	}, {
+		// 		server: httpServer,
+		// 		path: '/subscriptions',
+		// 	});
+		// })
 	});
 }
 export default start;

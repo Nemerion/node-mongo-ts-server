@@ -1,26 +1,32 @@
-//import { buildSchema } from "graphql";
 import { gql } from 'apollo-server-express';
 
-export const typeDefs = gql(`
+// import { buildSchema } from "graphql";
+// import { gql } from 'apollo-server-express';
+
+export const typeDefs = gql`
     scalar Date
 
     type Query {
-        game(_id:ID!): Game
-        history(_id: ID!): GameHistory
+        game(_id:ID): Game
+        history(_id: ID): GameHistory
+        games: [Game]
     }
 
     type Mutation {
-        createGame(_id:ID!, boardStatus: [[Int]]): Game
+        createGame(boardStatus: [[Int]]): Game
+    }
+
+    type Subscription {
+        gameAdded: Game
     }
 
     type Game {
-        _id: ID!
-        isYourTurn: Boolean
+        _id: ID
         boardStatus: [[Int]]
     }
     
     type GameHistory {
-        gameId: ID!
+        gameId: ID
         startTime: Date
         endTime: Date
         totalTurns: Int
@@ -31,20 +37,6 @@ export const typeDefs = gql(`
     schema {
         query: Query
         mutation: Mutation
+        subscription: Subscription
     }
-`);
-
-/*
-const emptyBoardMatrix = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-];
-*/
+`;
