@@ -11,9 +11,7 @@ const MONGO_URL = 'mongodb://localhost:27017/battleship';
 const dbName = 'battleship';
 const port = process.env.PORT || 3001;
 const prepare = (o) => {
-	console.log('inside prepare', o, o._id);
 	o._id = o._id.toString();
-	console.log(o, o._id);
     return o;
 }
 

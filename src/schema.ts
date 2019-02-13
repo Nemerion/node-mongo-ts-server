@@ -10,13 +10,13 @@ export const typeDefs = gql(`
     }
 
     type Mutation {
-        createGame(_id:ID!, boardStatus: [Int]): Game
+        createGame(_id:ID!, boardStatus: [[Int]]): Game
     }
 
     type Game {
         _id: ID!
         isYourTurn: Boolean
-        boardStatus: [Int]
+        boardStatus: [[Int]]
     }
     
     type GameHistory {
