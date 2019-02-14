@@ -1,19 +1,16 @@
 import { gql } from 'apollo-server-express';
 
-// import { buildSchema } from "graphql";
-// import { gql } from 'apollo-server-express';
-
 export const typeDefs = gql`
     scalar Date
 
     type Query {
         game(_id:ID): Game
-        history(_id: ID): GameHistory
         games: [Game]
+        history(_id: ID): GameHistory
     }
 
     type Mutation {
-        createGame(boardStatus: [[Int]]): Game
+        createGame(createdAt:Date, name:String, boardStatus: [[Int]]): Game
     }
 
     type Subscription {
@@ -23,6 +20,8 @@ export const typeDefs = gql`
     type Game {
         _id: ID
         boardStatus: [[Int]]
+        name: String
+        createdAt: Date
     }
     
     type GameHistory {
