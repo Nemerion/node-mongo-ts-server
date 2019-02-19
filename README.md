@@ -4,9 +4,6 @@ Boilerplate to jump-start a Node.js project in TypeScript, with React as Fronten
 
 Extracted from a previous boilerplate authored by Jakub Synowiec <github@jakubsynowiec.info>.
 
-## Dependencies
-
-
 ## Database
 This proyect uses MongoDb as database, and in order to run it, you need to have it installed in your computer. After that, if you are in Linux, just run:
 + `service mongod start` - run mongodb,
