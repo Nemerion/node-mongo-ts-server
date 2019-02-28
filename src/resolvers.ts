@@ -4,6 +4,7 @@ import { PubSub } from 'apollo-server-express';
 import { ObjectId} from 'mongodb';
 
 const GAME_ADDED = 'GAME_ADDED',
+    CURRENT_GAME = 'CURRENT_GAME',
     pubsub = new PubSub(),
     prepare = (o) => {
         o._id = o._id.toString();
@@ -13,36 +14,45 @@ const GAME_ADDED = 'GAME_ADDED',
 export const resolvers = {
     Query: {
         //fieldName(obj, args, context, info) { result } positional arguments of resolvers.
-        game: async (obj, {_id}, context) => {
+        gamePool: async (obj, {_id}, context) => {
             console.log(obj, _id);
-            return prepare(await context.db.collection('game').findOne(new ObjectId(_id)));
+            return prepare(await context.db.collection('gamePool').findOne(new ObjectId(_id)));
         },
-        history: async (obj, args, context) => {
+        gamesPool: async (obj, args, context) => {
             console.log(obj, args);
-            return await context.db.collection('history').findOne(args);
+            return await (await context.db.collection('gamePool').find({}).toArray()).map(prepare);
         },
-        games: async (obj, args, context) => {
+        myCurrentGames: async (obj, args, context) => {
             console.log(obj, args);
-            return await (await context.db.collection('game').find({}).toArray()).map(prepare);
+            return await (await context.db.collection('myCurrentGames').find({}).toArray()).map(prepare);
         }
     },
     Mutation: {
         createGame: async (obj, args, context) => {
-            const res = await context.db.collection('game').insertOne(args);
-            console.log(res.ops[0],obj, prepare(res.ops[0]));
+            const res = await context.db.collection('gamePool').insertOne(args);
+            console.log(obj, prepare(res.ops[0]));
             await pubsub.publish(GAME_ADDED, { gameAdded: prepare(res.ops[0]) });
+            return prepare(res.ops[0]);
+        },
+        addToMyGames: async (obj, args, context) => {
+            const res = await context.db.collection('myCurrentGames').insertOne(args);
+            console.log(obj, prepare(res.ops[0]));
+            await pubsub.publish(CURRENT_GAME, { currentGamesAdded: prepare(res.ops[0]) });
             return prepare(res.ops[0]);
         }
     },
     Subscription: {
+        // resolve: (payload, variables) => { return }
         gameAdded: {
             subscribe: () => pubsub.asyncIterator([GAME_ADDED]),
-            // resolve: (payload, variables) => { return }
+        },
+        currentGamesAdded: {
+            subscribe: () => pubsub.asyncIterator([CURRENT_GAME])
         }
     },
     Date: new GraphQLScalarType({
         name: 'Date',
-        description: 'Date custom scalar type. i.e: `2018-06-29`',
+        description: 'Date custom scalar type.',
         parseValue(value) {
           return new Date(value); // value from the client
         },

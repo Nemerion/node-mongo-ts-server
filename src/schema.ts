@@ -4,17 +4,19 @@ export const typeDefs = gql`
     scalar Date
 
     type Query {
-        game(_id:ID): Game
-        games: [Game]
-        history(_id: ID): GameHistory
+        gamePool(_id:ID): Game
+        gamesPool: [Game]
+        myCurrentGames: [Game]
     }
 
     type Mutation {
         createGame(createdAt:Date, name:String, boardStatus: [[Int]]): Game
+        addToMyGames(createdAt:Date, name:String, _id:ID): Game
     }
 
     type Subscription {
         gameAdded: Game
+        currentGamesAdded: Game
     }
 
     type Game {
@@ -22,12 +24,7 @@ export const typeDefs = gql`
         boardStatus: [[Int]]
         name: String
         createdAt: Date
-    }
-    
-    type GameHistory {
-        gameId: ID
-        startTime: Date
-        endTime: Date
+        endedAt: Date
         totalTurns: Int
         accuracy: Float
         status: Boolean
