@@ -19,24 +19,24 @@ export const resolvers = {
             return prepare(await context.db.collection('gamePool').findOne(new ObjectId(_id)));
         },
         gamesPool: async (obj, args, context) => {
-            console.log(obj, args);
+            console.log(obj, args, 'query gamesPool');
             return await (await context.db.collection('gamePool').find({}).toArray()).map(prepare);
         },
         myCurrentGames: async (obj, args, context) => {
-            console.log(obj, args);
+            console.log(obj, args, 'query myCurrentGames');
             return await (await context.db.collection('myCurrentGames').find({}).toArray()).map(prepare);
         }
     },
     Mutation: {
         createGame: async (obj, args, context) => {
             const res = await context.db.collection('gamePool').insertOne(args);
-            console.log(obj, prepare(res.ops[0]));
+            console.log(obj, 'mutation createGame');
             await pubsub.publish(GAME_ADDED, { gameAdded: prepare(res.ops[0]) });
             return prepare(res.ops[0]);
         },
         addToMyGames: async (obj, args, context) => {
             const res = await context.db.collection('myCurrentGames').insertOne(args);
-            console.log(obj, prepare(res.ops[0]));
+            console.log(obj, 'mutation addToMyGames');
             await pubsub.publish(CURRENT_GAME, { currentGamesAdded: prepare(res.ops[0]) });
             return prepare(res.ops[0]);
         }
