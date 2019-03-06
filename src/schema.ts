@@ -10,8 +10,8 @@ export const typeDefs = gql`
     }
 
     type Mutation {
-        createGame(createdAt:Date, name:String, boardStatus: [[Int]]): Game
-        addToMyGames(createdAt:Date, name:String, _id:ID): Game
+        createGame(createdAt:Date, name:String, timePlayed:Date, boardStatus: [[Int]]): Game
+        addToMyGames(createdAt:Date, name:String, timePlayed:Date, _id:ID): Game
     }
 
     type Subscription {
@@ -25,6 +25,7 @@ export const typeDefs = gql`
         name: String
         createdAt: Date
         endedAt: Date
+        timePlayed: Date
         totalTurns: Int
         accuracy: Float
         status: Boolean
