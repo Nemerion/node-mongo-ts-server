@@ -20,11 +20,11 @@ export const resolvers = {
         },
         gamesPool: async (obj, args, context) => {
             console.log(obj, args, 'query gamesPool');
-            return await (await context.db.collection('gamePool').find({}).toArray()).map(prepare);
+            return (await context.db.collection('gamePool').find({}).toArray()).map(prepare);
         },
         myCurrentGames: async (obj, args, context) => {
             console.log(obj, args, 'query myCurrentGames');
-            return await (await context.db.collection('myCurrentGames').find({}).toArray()).map(prepare);
+            return (await context.db.collection('myCurrentGames').find({}).toArray()).map(prepare);
         }
     },
     Mutation: {

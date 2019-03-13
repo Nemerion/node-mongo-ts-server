@@ -7,11 +7,14 @@ export const typeDefs = gql`
         gamePool(_id:ID): Game
         gamesPool: [Game]
         myCurrentGames: [Game]
+        user (id: ID!): User
     }
 
     type Mutation {
         createGame(createdAt:Date, name:String, timePlayed:String, boardStatus: [[Int]]): Game
         addToMyGames(createdAt:Date, name:String, timePlayed:String, _id:ID): Game
+        signup (username: String!, password: String!): String
+        login (password: String!): String
     }
 
     type Subscription {
@@ -29,6 +32,12 @@ export const typeDefs = gql`
         totalTurns: Int
         accuracy: Float
         status: Boolean
+        user: User
+    }
+
+    type User {
+        id: ID!
+        name: String!
     }
 
     schema {

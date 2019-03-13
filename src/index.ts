@@ -21,7 +21,21 @@ export const start = async () => {
 		const apolloServer = new ApolloServer({
 			typeDefs,
 			resolvers,
-			context: { db }
+			context: ({ req }) => {
+				// get the user token from the headers
+				//const token = req.headers.authorization || '';
+				//console.log('vevvevevevo', req);
+			   
+				// try to retrieve a user with the token
+				//const user = getUser(token);
+
+				// optionally block the user
+				// we could also check user roles/permissions here
+				//if (!user) throw new AuthorizationError('you must be logged in'); 
+			   
+				// add the user to the context and the mongo database
+				return { req, db };
+			}
 		});
 		const httpServer = createServer(app);
 
